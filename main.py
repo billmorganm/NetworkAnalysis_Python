@@ -3,133 +3,128 @@ from pygame import gfxdraw
 import numpy as np
 from Helper import *
 
-
-class Window:
-    def __init__(self, config={}):
-        # Simulation to draw
-        # self.sim = sim
-
-        # Set default configurations
-        self.set_default_config()
-
-        # Update configurations
-        for attr, val in config.items():
-            setattr(self, attr, val)
-
-    def set_default_config(self):
-        """Set default configuration"""
-        self.width = 1400
-        self.height = 1000
-        self.bg_color = (0, 0, 0)
-
-        self.fps = 60
-        self.zoom = 5
-        self.offset = (0, 0)
-
-        self.mouse_last = (0, 0)
-        self.mouse_down = False
-
-    def loop(self, loop=None):
-        """Shows a window visualizing the simulation and runs the loop function."""
-        # Create a pygame window
-        self.screen = pygame.display.set_mode((self.width, self.height))
-        pygame.display.flip()
-
-        # Fixed fps
-        clock = pygame.time.Clock()
-
-        # To draw text
-        pygame.font.init()
-        self.text_font = pygame.font.SysFont('Lucida Console', 16)
-
-        # Draw loop
-        running = True
-        while running:
-            # Update simulation
-            # if loop: loop(self.sim)
-
-            # Draw simulation
-            self.draw()
-
-            # Update window
-            pygame.display.update()
-            clock.tick(self.fps)
-
-            # Handle all events
-            for event in pygame.event.get():
-                # Handle mouse drag and wheel events
-                ...
-
-    def convert(self, x, y=None):
-        """Converts simulation coordinates to screen coordinates"""
-        ...
-
-    def inverse_convert(self, x, y=None):
-        """Converts screen coordinates to simulation coordinates"""
-        ...
-
-    def background(self, r, g, b):
-        """Fills screen with one color."""
-        ...
-
-    def line(self, start_pos, end_pos, color):
-        """Draws a line."""
-        ...
-
-    def rect(self, pos, size, color):
-        """Draws a rectangle."""
-        ...
-
-    def box(self, pos, size, color):
-        """Draws a rectangle."""
-        ...
-
-    def circle(self, pos, radius, color, filled=True):
-        """Draws a circle"""
-        ...
-
-    def polygon(self, vertices, color, filled=True):
-        """Draws a polygon"""
-
-    def rotated_box(self, pos, size, angle=None, cos=None, sin=None, centered=True, color=(0, 0, 255), filled=True):
-        """Draws a filled rectangle centered at *pos* with size *size* rotated anti-clockwise by *angle*."""
-
-    def rotated_rect(self, pos, size, angle=None, cos=None, sin=None, centered=True, color=(0, 0, 255)):
-        """Draws a rectangle centered at *pos* with size *size* rotated anti-clockwise by *angle*."""
-
-    def draw_axes(self, color=(100, 100, 100)):
-        """Draw x and y axis"""
-
-    def draw_grid(self, unit=50, color=(150, 150, 150)):
-        """Draws a grid"""
-
-    def draw_roads(self):
-        """Draws every road"""
-
-    def draw_status(self):
-        """Draws status text"""
-
-    def draw(self):
-        # Fill background
-        self.background(*self.bg_color)
+# import pygame module in this program
+import pygame
 
 
-        # Major and minor grid and axes
-        self.draw_grid(10, (220, 220, 220))
-        self.draw_grid(100, (200, 200, 200))
-        self.draw_axes()
+SCREEN_WIDTH = 900
+SCREEN_HEIGHT = 900
+# activate the pygame library
+pygame.init()
+win = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.RESIZABLE)
 
-        # Draw roads
-        self.draw_roads()
+screen = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), flags=pygame.SRCALPHA)
 
-        # Draw status info
-        self.draw_status()
+# set the pygame window name
+pygame.display.set_caption("Network Analysis")
+
+
+# object current co-ordinates
+x = 200
+y = 200
+
+# dimensions of the object
+width = 20
+height = 20
+
+# velocity / speed of movement
+vel = 10
+
+# Indicates pygame is running
+run = True
+
+
+size20font = pygame.font.SysFont('Helvetica', 20)
+size17font = pygame.font.SysFont('Helvetica', 17)
 
 stations = read_stations()
+lines = read_lines(stations)
+read_vehicles(stations, lines)
 
-locations = [station.location for station in stations]
+vehicle_passenger_count = 0
+vehicle_passenger_cap = 1
 
-win = Window()
-win.loop()
+# infinite loop
+while run:
+    # creates time delay of 10ms
+    pygame.time.delay(30)
+
+    # iterate over the list of Event objects that was returned by pygame.event.get() method.
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:  # if event object type is QUIT then quitting the pygame and program both. it will make exit the while loop
+            run = False
+
+    # stores keys pressed
+    keys = pygame.key.get_pressed()
+
+    # if left arrow key is pressed
+    if keys[pygame.K_LEFT] and x > 0:
+        # decrement in x co-ordinate
+        x -= vel
+
+    # if left arrow key is pressed
+    if keys[pygame.K_RIGHT] and x < 900 - width:
+        # increment in x co-ordinate
+        x += vel
+
+    # if left arrow key is pressed
+    if keys[pygame.K_UP] and y > 0:
+        # decrement in y co-ordinate
+        y -= vel
+
+    # if left arrow key is pressed
+    if keys[pygame.K_DOWN] and y < 900 - height:
+        # increment in y co-ordinate
+        y += vel
+
+    # completely fill the surface object with black colour
+    win.fill((0, 0, 0))
+
+    # drawing object on screen which is rectangle here
+    pygame.draw.rect(win, (255, 0, 0), (x, y, width, height))
+    rect_text = size20font.render(f"{vehicle_passenger_count}", True, (255, 255, 255))
+    win.blit(rect_text, (x, y))
+
+    # draw lines on map
+    for line in lines:
+        for i in range(len(line.stops)-1):
+            pygame.draw.line(win,
+                             color=(240,240,240),
+                             start_pos= (500 + 30*line.stops[i].location[0], 500 + 30*line.stops[i].location[1]),
+                             end_pos= (500 + 30*line.stops[i+1].location[0], 500 + 30*line.stops[i+1].location[1])
+                             )
+
+        # draw vehicles on map
+        for vehicle in line.vehicles:
+            vehicle.move()
+            pygame.draw.rect(win, (0, 255, 0), (500 + 30*vehicle.x, 500+30*vehicle.y, width, height), border_radius=3)
+            rect_text = size20font.render(f"{vehicle_passenger_count}", True, (255, 255, 255))
+            win.blit(rect_text, (x, y))
 
 
+
+    # draw stations on map
+    for station in stations:
+        xloc = 500+station.location[0]*30
+        yloc = 500+station.location[1]*30
+        # pygame.draw.rect(win, (255, 255, 255), (xloc, yloc, width, height))
+
+        # update arrivals
+        station.simulate_arrivals(10)
+
+        # colour code if cursor is near
+        if abs(xloc-x) < 30 and abs(yloc-y) < 30:
+            pygame.draw.circle(win, (82,167,226), (xloc, yloc), width/2)
+            station.board_passengers(vehicle_passenger_count, vehicle_passenger_cap)
+        else:
+            pygame.draw.circle(win, (255, 255, 255), (xloc, yloc), width / 2)
+        dist_text = size20font.render(f"{station.name} || {int(station.passenger_count)}", True, (255, 255, 255))
+        win.blit(dist_text, (xloc, yloc+30))
+
+
+
+    # Refreshes the window
+    pygame.display.update()
+
+# closes the pygame window
+pygame.quit()
