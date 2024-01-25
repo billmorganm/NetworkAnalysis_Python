@@ -1,0 +1,39 @@
+Source,Target,Line,Color,Train_Position,Volume
+Melbourne CBD Station,Melbourne CBD Platform (Glen Waverley Line),Glen Waverley Line,gray,0.1,7.0
+Melbourne CBD Station,Melbourne CBD Platform (Werribee Line),Werribee Line,gray,0.1,9.35
+Melbourne CBD Station,Melbourne CBD Platform (Pakenham Line),Pakenham Line,gray,0.1,5.3
+Melbourne CBD Station,Melbourne CBD Platform (Broadmeadows Line),Broadmeadows Line,gray,0.1,7.25
+Richmond Station,Richmond Platform (Glen Waverley Line),Glen Waverley Line,gray,0.1,5.1
+Richmond Station,Richmond Platform (Pakenham Line),Pakenham Line,gray,0.1,3.4
+Tooronga Station,Tooronga Platform (Glen Waverley Line),Glen Waverley Line,gray,0.1,2.95
+Syndal Station,Syndal Platform (Glen Waverley Line),Glen Waverley Line,gray,0.1,2.1
+Glen Waverley Station,Glen Waverley Platform (Glen Waverley Line),Glen Waverley Line,gray,0.1,2.7
+Footscray Station,Footscray Platform (Werribee Line),Werribee Line,gray,0.1,3.0
+Spotswood Station,Spotswood Platform (Werribee Line),Werribee Line,gray,0.1,2.55
+Laverton Station,Laverton Platform (Werribee Line),Werribee Line,gray,0.1,3.05
+Werribee Station,Werribee Platform (Werribee Line),Werribee Line,gray,0.1,2.8
+Caulfield Station,Caulfield Platform (Pakenham Line),Pakenham Line,gray,0.1,2.9
+Clayton Station,Clayton Platform (Pakenham Line),Pakenham Line,gray,0.1,2.95
+Dandenong Station,Dandenong Platform (Pakenham Line),Pakenham Line,gray,0.1,2.25
+Pakenham Station,Pakenham Platform (Pakenham Line),Pakenham Line,gray,0.1,2.3
+North Melbourne Station,North Melbourne Platform (Broadmeadows Line),Broadmeadows Line,gray,0.1,1.65
+Essendon Station,Essendon Platform (Broadmeadows Line),Broadmeadows Line,gray,0.1,3.05
+Pascoe Vale Station,Pascoe Vale Platform (Broadmeadows Line),Broadmeadows Line,gray,0.1,2.0
+Broadmeadows Station,Broadmeadows Platform (Broadmeadows Line),Broadmeadows Line,gray,0.1,1.8
+Melbourne CBD Platform (Glen Waverley Line),Richmond Platform (Glen Waverley Line),Glen Waverley Line,blue,0.0,7.0
+Richmond Platform (Glen Waverley Line),Tooronga Platform (Glen Waverley Line),Glen Waverley Line,blue,0.0,7.25
+Tooronga Platform (Glen Waverley Line),Syndal Platform (Glen Waverley Line),Glen Waverley Line,blue,0.0,4.85
+Syndal Platform (Glen Waverley Line),Glen Waverley Platform (Glen Waverley Line),Glen Waverley Line,blue,0.0,2.85
+Melbourne CBD Platform (Werribee Line),Footscray Platform (Werribee Line),Werribee Line,red,0.0,9.35
+Footscray Platform (Werribee Line),Spotswood Platform (Werribee Line),Werribee Line,red,0.0,8.35
+Spotswood Platform (Werribee Line),Laverton Platform (Werribee Line),Werribee Line,red,0.0,6.15
+Laverton Platform (Werribee Line),Werribee Platform (Werribee Line),Werribee Line,red,0.0,2.6
+Melbourne CBD Platform (Pakenham Line),Richmond Platform (Pakenham Line),Pakenham Line,green,0.0,5.3
+Richmond Platform (Pakenham Line),Caulfield Platform (Pakenham Line),Pakenham Line,green,0.0,8.7
+Caulfield Platform (Pakenham Line),Clayton Platform (Pakenham Line),Pakenham Line,green,0.0,7.15
+Clayton Platform (Pakenham Line),Dandenong Platform (Pakenham Line),Pakenham Line,green,0.0,4.4
+Dandenong Platform (Pakenham Line),Pakenham Platform (Pakenham Line),Pakenham Line,green,0.0,2.4
+Melbourne CBD Platform (Broadmeadows Line),North Melbourne Platform (Broadmeadows Line),Broadmeadows Line,yellow,0.0,7.25
+North Melbourne Platform (Broadmeadows Line),Essendon Platform (Broadmeadows Line),Broadmeadows Line,yellow,0.0,6.05
+Essendon Platform (Broadmeadows Line),Pascoe Vale Platform (Broadmeadows Line),Broadmeadows Line,yellow,0.0,4.4
+Pascoe Vale Platform (Broadmeadows Line),Broadmeadows Platform (Broadmeadows Line),Broadmeadows Line,yellow,0.0,2.2
