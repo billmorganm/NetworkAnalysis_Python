@@ -32,14 +32,14 @@ suburbs = {
     "Broadmeadows": (144.9190, -37.6841),
 }
 
-# Define lines as dictionaries containing their name, list of suburbs, and color
-line_1 = {"name": "Glen Waverley Line", "suburbs": ["Melbourne CBD", "Richmond", "Tooronga", "Syndal", "Glen Waverley"],
+# Define lines as dictionaries containing their node_name, list of suburbs, and color
+line_1 = {"node_name": "Glen Waverley Line", "suburbs": ["Melbourne CBD", "Richmond", "Tooronga", "Syndal", "Glen Waverley"],
           "color": "blue"}
-line_2 = {"name": "Werribee Line", "suburbs": ["Melbourne CBD", "Footscray", "Spotswood", "Laverton", "Werribee"],
+line_2 = {"node_name": "Werribee Line", "suburbs": ["Melbourne CBD", "Footscray", "Spotswood", "Laverton", "Werribee"],
           "color": "red"}
-line_3 = {"name": "Pakenham Line",
+line_3 = {"node_name": "Pakenham Line",
           "suburbs": ["Melbourne CBD", "Richmond", "Caulfield", "Clayton", "Dandenong", "Pakenham"], "color": "green"}
-line_4 = {"name": "Broadmeadows Line",
+line_4 = {"node_name": "Broadmeadows Line",
           "suburbs": ["Melbourne CBD", "North Melbourne", "Essendon", "Pascoe Vale", "Broadmeadows"], "color": "yellow"}
 
 lines = [line_1, line_2, line_3, line_4]
@@ -53,13 +53,13 @@ for suburb in suburbs:
 # Step 2: Create platform nodes and link together nodes in the same line
 def add_line_to_graph(graph, line):
     for i in range(len(line["suburbs"]) - 1):
-        platform_node_1 = f"{line['suburbs'][i]} Platform ({line['name']})"
-        platform_node_2 = f"{line['suburbs'][i + 1]} Platform ({line['name']})"
+        platform_node_1 = f"{line['suburbs'][i]} Platform ({line['node_name']})"
+        platform_node_2 = f"{line['suburbs'][i + 1]} Platform ({line['node_name']})"
 
         graph.add_node(platform_node_1, pos=suburbs[line['suburbs'][i]])
         graph.add_node(platform_node_2, pos=suburbs[line['suburbs'][i + 1]])
 
-        graph.add_edge(platform_node_1, platform_node_2, line=line['name'], color=line['color'], train_position=0)
+        graph.add_edge(platform_node_1, platform_node_2, line=line['node_name'], color=line['color'], train_position=0)
 
 
 # Add lines to the graph
@@ -73,9 +73,9 @@ add_line_to_graph(G, line_4)
 def connect_platforms_to_station(graph, line):
     for suburb in line["suburbs"]:
         station_node = f"{suburb} Station"
-        platform_node = f"{suburb} Platform ({line['name']})"
+        platform_node = f"{suburb} Platform ({line['node_name']})"
 
-        graph.add_edge(station_node, platform_node, line=line['name'], color='gray', train_position=0.1)
+        graph.add_edge(station_node, platform_node, line=line['node_name'], color='gray', train_position=0.1)
 
 
 # Connect platforms to station for each line

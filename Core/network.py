@@ -29,59 +29,62 @@ def get_suburbs():
     }
     return suburbs
 
-def create_graph(suburbs):
-    # Create a graph
-    G = nx.Graph()
 
-    # Define lines as dictionaries containing their name, list of suburbs, and color
-    line_1 = {"name": "Glen Waverley Line", "suburbs": ["Melbourne CBD", "Richmond", "Tooronga", "Syndal", "Glen Waverley"],
+def get_lines():
+    # Define lines as dictionaries containing their node_name, list of suburbs, and color
+    line_1 = {"line_name": "Glen Waverley Line", "suburbs": ["Melbourne CBD", "Richmond", "Tooronga", "Syndal", "Glen Waverley"],
               "color": "blue"}
-    line_2 = {"name": "Werribee Line", "suburbs": ["Melbourne CBD", "Footscray", "Spotswood", "Laverton", "Werribee"],
+    line_2 = {"line_name": "Werribee Line", "suburbs": ["Melbourne CBD", "Footscray", "Spotswood", "Laverton", "Werribee"],
               "color": "red"}
-    line_3 = {"name": "Pakenham Line",
+    line_3 = {"line_name": "Pakenham Line",
               "suburbs": ["Melbourne CBD", "Richmond", "Caulfield", "Clayton", "Dandenong", "Pakenham"], "color": "green"}
-    line_4 = {"name": "Broadmeadows Line",
+    line_4 = {"line_name": "Broadmeadows Line",
               "suburbs": ["Melbourne CBD", "North Melbourne", "Essendon", "Pascoe Vale", "Broadmeadows"], "color": "yellow"}
 
     lines = [line_1, line_2, line_3, line_4]
 
+    return lines
+
+
+def create_graph(suburbs):
+    # Create a graph
+    G = nx.Graph()
+
+    lines = get_lines()
+
     # Step 1: Create station nodes
     for suburb in suburbs:
         station_name = f"{suburb} Station"
-        G.add_node(station_name, pos=suburbs[suburb])
+        G.add_node(station_name, pos=suburbs[suburb], node_type='Station')
 
     # Step 2: Create platform nodes and link together nodes in the same line
     def add_line_to_graph(graph, line):
         for i in range(len(line["suburbs"]) - 1):
-            platform_node_1 = f"{line['suburbs'][i]} Platform ({line['name']})"
-            platform_node_2 = f"{line['suburbs'][i + 1]} Platform ({line['name']})"
+            platform_node_1 = f"{line['suburbs'][i]} Platform ({line['line_name']})"
+            platform_node_2 = f"{line['suburbs'][i + 1]} Platform ({line['line_name']})"
 
-            graph.add_node(platform_node_1, pos=suburbs[line['suburbs'][i]])
-            graph.add_node(platform_node_2, pos=suburbs[line['suburbs'][i + 1]])
+            graph.add_node(platform_node_1, pos=suburbs[line['suburbs'][i]], node_type='Platform')
+            graph.add_node(platform_node_2, pos=suburbs[line['suburbs'][i + 1]], node_type='Platform')
 
-            graph.add_edge(platform_node_1, platform_node_2, line=line['name'], color=line['color'], train_position=0)
+            length= euclidean(suburbs[line['suburbs'][i]], suburbs[line['suburbs'][i+1]])
+            graph.add_edge(platform_node_1, platform_node_2, line=line['line_name'], color=line['color'], edge_len=length)
 
     # Add lines to the graph
-    add_line_to_graph(G, line_1)
-    add_line_to_graph(G, line_2)
-    add_line_to_graph(G, line_3)
-    add_line_to_graph(G, line_4)
-
+    for line in lines:
+        add_line_to_graph(G, line)
 
     # Step 3: Connect platform nodes to their corresponding station node
     def connect_platforms_to_station(graph, line):
         for suburb in line["suburbs"]:
             station_node = f"{suburb} Station"
-            platform_node = f"{suburb} Platform ({line['name']})"
+            platform_node = f"{suburb} Platform ({line['line_name']})"
 
-            graph.add_edge(station_node, platform_node, line=line['name'], color='gray', train_position=0.1)
+            graph.add_edge(station_node, platform_node, line=line['line_name'], color='gray', edge_len=0)
 
 
     # Connect platforms to station for each line
-    connect_platforms_to_station(G, line_1)
-    connect_platforms_to_station(G, line_2)
-    connect_platforms_to_station(G, line_3)
-    connect_platforms_to_station(G, line_4)
+    for line in lines:
+        connect_platforms_to_station(G, line)
 
     return G
 

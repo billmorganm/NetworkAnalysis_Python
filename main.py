@@ -15,7 +15,7 @@ win = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.RESIZABLE)
 
 screen = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), flags=pygame.SRCALPHA)
 
-# set the pygame window name
+# set the pygame window node_name
 pygame.display.set_caption("Network Analysis")
 
 
