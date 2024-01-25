@@ -2,7 +2,7 @@
 import pygame
 from pygame.locals import QUIT
 import networkx as nx
-from sim import G
+from Core.network import G
 
 
 # Create Pygame window

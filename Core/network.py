@@ -1,6 +1,5 @@
 import networkx as nx
 import matplotlib.pyplot as plt
-import volumes
 import pandas as pd
 import numpy as np
 import networkx as nx
@@ -86,51 +85,76 @@ def create_graph(suburbs):
 
     return G
 
-def get_volumes(G, suburbs):
-    # Melbourne CBD coordinates
+
+def get_suburb_population_df(suburbs):
     cbd_coordinates = suburbs["Melbourne CBD"]
 
     # Function to calculate population based on inverse distance
     def calculate_population(distance):
         return max(int(np.random.normal(5000 * (1 / (distance + 1)), 1000)), 100)
 
-
     # Generate population dictionary
     population_dict = {suburb: calculate_population(euclidean(cbd_coordinates, np.array(coords))) for suburb, coords in
                        suburbs.items()}
 
-    print("Population Dictionary inversely proportional to Distance to Melbourne CBD:")
-    print(population_dict)
-
     # Convert dictionary to Pandas DataFrame
     df_population = DataFrame(list(population_dict.items()), columns=['Suburb', 'Population'])
 
-    # Display the DataFrame
-    df_population
+    return df_population
+
+
+def generate_agent_od_pairs(suburbs, n=1000, seed_o=42, seed_d=100):
+    """
+    Generate origin-destination pairs for a given number of agents.
+
+    Parameters:
+    - suburbs (dict): Dictionary where keys are suburb names and values are (x, y) coordinates.
+    - n (int, optional): Number of agents for the simulation. Default is 1000.
+    - seed_o (int, optional): Random seed for origin movement. Default is 42.
+    - seed_d (int, optional): Random seed for destination movement. Default is 100.
+
+    Returns:
+    - DataFrame: A DataFrame containing the simulation results with columns:
+        - 'Person': Individual identifier for each agent.
+        - 'Moving From': Suburb from which the agent is moving.
+        - 'Moving To': Suburb to which the agent is moving.
+
+    Raises:
+    - ValueError: If suburbs is empty, n is not a positive integer, or if suburb names are not strings.
+    """
+    # Validate input parameters
+    if not suburbs or not all(isinstance(name, str) for name in suburbs.keys()):
+        raise ValueError("Suburbs must be a non-empty dictionary with string keys.")
+
+    if not isinstance(n, int) or n <= 0:
+        raise ValueError("Number of agents (n) must be a positive integer.")
 
     # Assuming df_population is the DataFrame containing suburbs and populations
+    df_population = get_suburb_population_df(suburbs)
 
     # Extract populations and suburbs from the DataFrame
     populations = df_population['Population'].values
     suburbs = df_population['Suburb'].values
 
-    # Normalize populations to create probability distribution
+    # Normalize populations to create a probability distribution
     probabilities = populations / np.sum(populations)
 
-    # Set the seed
-    np.random.seed(42)
-    movement_simulation_o = np.random.choice(suburbs, size=1000, p=probabilities)
+    # Set the seed for random number generation
+    np.random.seed(seed_o)
+    origin_suburbs = np.random.choice(suburbs, size=n, p=probabilities)
 
-    np.random.seed(100)
-    movement_simulation_d = np.random.choice(suburbs, size=1000, p=probabilities)
+    np.random.seed(seed_d)
+    destination_suburbs = np.random.choice(suburbs, size=n, p=probabilities)
 
     # Create a new DataFrame for the simulation results
-    df_simulation = DataFrame(
-        {'Person': range(1, 1001), 'Moving From': movement_simulation_o, 'Moving To': movement_simulation_d})
+    df_simulation = pd.DataFrame(
+        {'Person': range(1, n + 1), 'Moving From': origin_suburbs, 'Moving To': destination_suburbs})
 
-    # Display the simulation results
-    (df_simulation)
+    # Return the simulation results
+    return df_simulation
 
+
+def get_traffic_volumes(graph, df_simulation):
     import pandas as pd
 
     # Assuming you have the DataFrame df_simulation from the previous steps
@@ -151,7 +175,7 @@ def get_volumes(G, suburbs):
     print(grouped_df)
 
     a = grouped_df.apply(
-        lambda row: " > ".join(nx.shortest_path(G, f'{row["Moving From"]} Station', f'{row["Moving To"]} Station')), axis=1)
+        lambda row: " > ".join(nx.shortest_path(graph, f'{row["Moving From"]} Station', f'{row["Moving To"]} Station')), axis=1)
 
     paths = grouped_df.copy()
     paths['Path'] = a
@@ -176,6 +200,6 @@ def get_volumes(G, suburbs):
                         result[stops[i]][stops[i + 1]] = row['Count']
         return result
 
-
     volumes = get_traffic_dict(paths_df=paths)
+
     return volumes

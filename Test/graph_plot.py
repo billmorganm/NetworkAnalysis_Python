@@ -1,6 +1,6 @@
 import networkx as nx
 import matplotlib.pyplot as plt
-from sim import G, volumes
+from Core.network import G, volumes
 
 # Draw the graph
 pos = nx.get_node_attributes(G, 'pos')
