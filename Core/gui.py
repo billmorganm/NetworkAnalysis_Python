@@ -50,9 +50,12 @@ suburbs = nx.get_suburbs()
 graph = nx.create_graph(suburbs)
 engine = model.NetworkAnalysis(graph)
 engine.add_test_vehicle()
+engine.add_agents(2)
+print("done adding agents")
+print(engine.agents)
 
-df_simulation = nx.generate_agent_od_pairs(suburbs, n=1000)  # You can adjust the number of agents (n) as needed
-traffic_volumes = nx.get_traffic_volumes(graph, df_simulation)
+# df_simulation = nx.generate_agent_od_pairs(suburbs, n=1000)  # You can adjust the number of agents (n) as needed
+# traffic_volumes = nx.get_traffic_volumes(graph, df_simulation)
 
 
 def get_display_position(node_name=None, pos=None, world_offset=(-144.9631, +37.8136)):
@@ -85,7 +88,7 @@ def update_screen():
     for line in graph.edges(data=True):
         start_pos = line[0]
         end_pos = line[1]
-        traffic_count = traffic_volumes.get(start_pos, {}).get(end_pos, 0)
+        # traffic_count = traffic_volumes.get(start_pos, {}).get(end_pos, 0)
 
         canvas.create_line(get_display_position(node_name=start_pos), get_display_position(node_name=end_pos), fill="white", width=10) # =traffic_count / 10)
 
@@ -101,10 +104,10 @@ def update_screen():
     for vehicle in engine.vehicles:
         xloc, yloc = get_display_position(pos=vehicle.calculate_vehicle_position(network=graph))
         canvas.create_oval(xloc - width / 2, yloc - width / 2, xloc + width / 2, yloc + width / 2, fill="green")
-        canvas.create_text(xloc, yloc + 30, text=f"V{vehicle.id}", fill="white", font=smallfont)
+        canvas.create_text(xloc, yloc + 30, text=f"V{vehicle.id} ({len(vehicle.passengers)}/{vehicle.capacity})", fill="white", font=smallfont)
         win.after(10, vehicle.move())
 
-    win.after(100, update_screen)
+    win.after(10, update_screen)
 
 
 def on_key_press(event):

@@ -11,3 +11,4 @@ engine = m.NetworkAnalysis(G)
 engine.add_agents(100)
 
 print(engine.agents)
+

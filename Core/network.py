@@ -89,7 +89,10 @@ def create_graph(suburbs):
     return G
 
 
-def get_suburb_population_df(suburbs):
+def get_suburb_population_df(suburbs, seed=42):
+
+    np.random.seed(seed)
+
     cbd_coordinates = suburbs["Melbourne CBD"]
 
     # Function to calculate population based on inverse distance
