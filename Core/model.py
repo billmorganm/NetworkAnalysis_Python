@@ -10,7 +10,7 @@ class NetworkAnalysis:
         # initialize engine objects
         self.stations: [Station] = [Station(name=node) for node in self.network.nodes if "Station" in node]
         for station in self.stations:
-            platforms = [node for node in self.network.nodes if (("Platform" in node) and (station.name.split("Station")[0] in node))]
+            platforms = [node for node in self.network.nodes if (f"{station.name.split(' Station')[0]} Platform" in node)]
             for platform in platforms:
                 line_name = platform.split("(")[1].split(" Line")[0]
                 station.add_platform(Platform(station, line_name))
@@ -67,7 +67,7 @@ class NetworkAnalysis:
         for station in self.stations:
             station.process_waitlist()
 
-    def add_test_vehicle(self):
+    def add_test_vehicles(self):
         # path = nx.shortest_path(self.network,"Melbourne CBD Platform (Glen Waverley Line)", "Glen Waverley Station")
         vehicle1 = Vehicle(id=1,
                           engine=self,
@@ -97,7 +97,13 @@ class NetworkAnalysis:
                            assigned_line="Pakenham Line",
                            current_edge_traversed=0.0)
 
-        self.vehicles.extend([vehicle1, vehicle2, vehicle3, vehicle4])
+        vehicle5 = Vehicle(id=5,
+                           engine=self,
+                           current_node="Broadmeadows Platform (Broadmeadows Line)",
+                           assigned_line="Broadmeadows Line",
+                           current_edge_traversed=0.0)
+
+        self.vehicles.extend([vehicle1, vehicle2, vehicle3, vehicle4, vehicle5])
 
 
 class Agent:
@@ -129,7 +135,7 @@ class Agent:
 class Vehicle:
     printing_logs = True
 
-    def __init__(self, id, engine, capacity=50, current_node=None, assigned_line="", path=[], current_edge_traversed=0.0):
+    def __init__(self, id, engine, capacity=50, current_node=None, assigned_line="", current_edge_traversed=0.0):
         self.id = id
         self.capacity = capacity
         self.speed = 0.1
@@ -137,12 +143,14 @@ class Vehicle:
         self.max_acceleration = 2
         self.current_node = current_node
         self.current_edge_traversed = current_edge_traversed
-        self.path = path
         self.passengers = []
         self.assigned_line = assigned_line
         self.engine: NetworkAnalysis = engine
+        self.path = []
+        self.repopulate_path(current_node, trim_path=False)
+        print(self.path)
 
-    def repopulate_path(self, last_known_node):
+    def repopulate_path(self, last_known_node, trim_path=True):
         lines = nw.get_lines()
         last_known_suburb = last_known_node.split("Platform")[0].strip().split("Station")[0].strip()
 
@@ -154,14 +162,20 @@ class Vehicle:
                 last = f"{line['suburbs'][-1]} Platform ({line_name})"
 
                 if last_known_suburb == line["suburbs"][-1]:
-                    self.path = nx.shortest_path(self.engine.network, last, first)[1:]
+                    self.path = nx.shortest_path(self.engine.network, last, first)
 
                 else:
-                    self.path = nx.shortest_path(self.engine.network, first, last)[1:]
+                    self.path = nx.shortest_path(self.engine.network, first, last)
+
+                if trim_path:
+                    self.path = self.path[1:]
+
+    def __repr__(self):
+        return f"V{self.id}: {len(self.passengers)}/{self.capacity}"
 
     def move(self):
-        last_known_node = self.current_node
-        self.current_edge_traversed += 0.10 #random.uniform(0.2,0.3)
+
+        self.current_edge_traversed += 0.008 #random.uniform(0.2,0.3)
 
         if self.current_edge_traversed > 1.0:
 
@@ -171,12 +185,17 @@ class Vehicle:
                 self.current_node = self.path[0]
                 self.path = self.path[1:]
 
+                last_known_node = self.current_node
+
+                # repopulate so that passengers on platform can board
+                if self.path == []:
+                    self.repopulate_path(self.current_node)
+
                 # handle arrival
-                platform = self.engine.get_platform_from_name(self.current_node)
+                platform = self.engine.get_platform_from_name(last_known_node)
                 platform.process_vehicle_arrival(self)
 
-            if self.path == []:
-                self.repopulate_path(self.current_node)
+
 
     def add_passenger(self, passenger):
         self.passengers.append(passenger)
@@ -225,7 +244,7 @@ class Platform:
 
     def process_vehicle_arrival(self, vehicle: Vehicle):
 
-        to_remove = []
+        to_remove_from_vehicle = []
 
         # At an arrival event,
         for passenger in vehicle.passengers:
@@ -241,21 +260,20 @@ class Platform:
                 passenger.path = passenger.path[2:] # move directly to station waitlist
                 self.station.add_to_waiting_list(passenger)
                 passenger.log_event(f"arrived at {self.station.name}")
-                to_remove.append(passenger)
+                to_remove_from_vehicle.append(passenger)
 
             else:
                 # passenger proceeds on their journey
                 passenger.current_node = None  # TODO
                 passenger.path = passenger.path[1:]
 
-        if len(to_remove)>0:
-            for passenger in to_remove:
-                vehicle.passengers.remove(passenger)
-
-            self.station.process_waitlist()
+        # remove passengers from vehicle
+        vehicle.passengers = [passenger for passenger in vehicle.passengers if passenger not in to_remove_from_vehicle]
+        self.station.process_waitlist()
 
         remaining_capacity_on_vehicle = vehicle.capacity - len(vehicle.passengers)
 
+        to_remove_from_waitlist = []
         for passenger in self.waitlist[:remaining_capacity_on_vehicle]:
             # check heading to the same nod
             if len(vehicle.path) == 0:
@@ -264,8 +282,9 @@ class Platform:
                 passenger.parent = vehicle
                 vehicle.add_passenger(passenger)
                 passenger.log_event(f"boarded V{vehicle.id}")
-                self.waitlist.remove(passenger)
+                to_remove_from_waitlist.append(passenger)
 
+        self.waitlist = [passenger for passenger in self.waitlist if passenger not in to_remove_from_waitlist]
 
 class Station:
 
@@ -289,11 +308,15 @@ class Station:
         pass
 
     def process_waitlist(self):
+        to_remove = []
 
         for passenger in self.waitlist:
             if passenger.path == []:
+                if passenger.id == 125:
+                    print("DEBUG")
                 passenger.log_event(f"{passenger} finished trip")
                 passenger.parent = None
+                to_remove.append(passenger)
             else:
                 flag_successfully_processed = False
                 # move to platform in their next node
@@ -302,12 +325,15 @@ class Station:
                         passenger.parent = platform
                         passenger.path = passenger.path[1:]
                         platform.add_to_waiting_list(passenger)
-                        self.waitlist.remove(passenger)
+                        to_remove.append(passenger)
+
                         flag_successfully_processed = True
 
                 if not flag_successfully_processed:
                     raise ValueError(f"{repr(passenger)} in the wrong station")
 
+        # remove passengers from to_remove
+        self.waitlist = [passenger for passenger in self.waitlist if passenger not in to_remove]
 
 
 

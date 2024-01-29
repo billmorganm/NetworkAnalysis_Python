@@ -49,8 +49,8 @@ suburbs = nx.get_suburbs()
 
 graph = nx.create_graph(suburbs)
 engine = model.NetworkAnalysis(graph)
-engine.add_test_vehicle()
-engine.add_agents(2)
+engine.add_test_vehicles()
+engine.add_agents(200)
 print("done adding agents")
 print(engine.agents)
 
@@ -104,10 +104,11 @@ def update_screen():
     for vehicle in engine.vehicles:
         xloc, yloc = get_display_position(pos=vehicle.calculate_vehicle_position(network=graph))
         canvas.create_oval(xloc - width / 2, yloc - width / 2, xloc + width / 2, yloc + width / 2, fill="green")
-        canvas.create_text(xloc, yloc + 30, text=f"V{vehicle.id} ({len(vehicle.passengers)}/{vehicle.capacity})", fill="white", font=smallfont)
-        win.after(10, vehicle.move())
+        canvas.create_text(xloc, yloc + 30, text=repr(vehicle), fill="white", font=smallfont)
+        vehicle.move()
+        # win.after(15, vehicle.move())
 
-    win.after(10, update_screen)
+    win.after(15, update_screen)
 
 
 def on_key_press(event):
@@ -130,5 +131,5 @@ def on_key_release(e):
 
 win.bind("<Key>", on_key_press)
 
-win.after(30, update_screen)
+win.after(15, update_screen)
 win.mainloop()
